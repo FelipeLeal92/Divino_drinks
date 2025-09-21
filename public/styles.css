@@ -2,8 +2,8 @@
   --black:#0A0A0A;
   --bg:#0E0E0E;
   --card:#121212;
-  --gold:#D4AF37;
-  --gold-2:#b89423;
+  --gold:#FFD21F;
+  --gold-2:#bd9a26;
   --text:#E9E9E9;
   --muted:#B5B5B5;
   --line:rgba(255,255,255,0.08);
@@ -18,7 +18,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  font-family:'Montserrat',sans-serif;
   color:var(--text);
   background:linear-gradient(180deg,var(--black),var(--bg));
   line-height:1.6;
@@ -41,12 +41,21 @@ p{margin:.6rem 0 1rem 0}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;
   gap:.6rem;padding:.9rem 1.2rem;border-radius:999px;border:1px solid var(--gold);
-  transition:.25s all ease; font-weight:600; letter-spacing:.2px
+  transition:.25s all ease; font-weight:600; letter-spacing:.2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5); /* Sombra para destacar */
 }
 .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#111;border-color:transparent}
-.btn-primary:hover{filter:brightness(1.05);transform:translateY(-1px)}
-.btn-outline{color:var(--gold);background:transparent}
-.btn-outline:hover{background:rgba(212,175,55,0.08)}
+.btn-primary:hover{
+  background: transparent;
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.btn-outline{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#111;border-color:transparent}
+.btn-outline:hover{
+  background: transparent;
+  color: var(--gold);
+  border-color: var(--gold);
+}
 .btn-large{padding:1.05rem 1.4rem;font-size:1.05rem}
 
 /* Header */
@@ -106,12 +115,15 @@ p{margin:.6rem 0 1rem 0}
   background-image:
     radial-gradient(800px 400px at 80% -10%, rgba(212,175,55,.08), transparent 60%),
     radial-gradient(600px 300px at 20% -10%, rgba(212,175,55,.06), transparent 60%),
-    url(imagens/hero.photo.webp);
+    url(imagens/hero.webp);
   background-size: cover;background-position: center;background-repeat: no-repeat;
 }
 /* Sombra para legibilidade */
 .hero-overlay {
-  position: absolute;inset: 0;background: rgba(0,0,0,0.50);z-index: 0;
+   position: absolute;inset: 0;
+  /* Gradiente para escurecer a base e melhorar a legibilidade do texto */
+  background: rgba(0,0,0,0.5); /* Sombra uniforme sobre toda a imagem */
+  z-index: 0;
 }
 /* Conteúdo centralizado */
 .hero-inner {
@@ -120,9 +132,11 @@ p{margin:.6rem 0 1rem 0}
 }
 .hero-content h1 {
   font-size: clamp(2rem, 3.8vw, 3.2rem);
+  font-family: 'Montserrat', sans-serif;
 }
 .hero-content p {
   color: var(--text);font-size: 1.05rem;max-width: 720px;margin: 0 auto; /* centraliza largura máxima */
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.9); /* Adiciona sombra para legibilidade */
 }
 .hero-ctas {
   display: flex;gap: 12px;margin-top: 16px;flex-wrap: wrap;justify-content: center;
@@ -163,13 +177,14 @@ p{margin:.6rem 0 1rem 0}
   box-shadow: var(--shadow);
 }
 .section-header h2 {
-  color: var(--gold-2);
+  color: var(--gold);
   font-size: 1.8rem;
   margin-bottom: 16px;
   position: relative;
   display: inline-block;
   padding: 0 20px;
   font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
 }
 .section-header h2::before,
 .section-header h2::after {
@@ -195,7 +210,7 @@ p{margin:.6rem 0 1rem 0}
   text-align: justify;
 }
 .section-header p strong {
-  color: var(--gold-2);   /* destaca no dourado */
+  color: var(--gold);   /* destaca no dourado */
   font-weight: 600;       /* peso moderado */
 }
 
@@ -209,21 +224,23 @@ p{margin:.6rem 0 1rem 0}
 .about-card h3{color:var(--gold);text-align: center;}
 
 /* Services */
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:30px}
 .card{
   background:linear-gradient(180deg,var(--card),#0f0f0f);
-  border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:10px
+  border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:5px
 }
 .card h3{
   margin-top:8px;color:var(--gold);text-align: center;
   font-size: 1.25rem;font-weight: 700;
+   font-family: 'Montserrat', sans-serif;
 }
 .card p{
-  flex-grow:1; text-align: center; font-size: 0.95rem; line-height: 1.45
+  flex-grow:1; text-align: center; font-size: 1rem; line-height: 1.45;
 }
 .card-image {
   width: 100%;
-  height: 260px;
+  max-height: 350px;
+  aspect-ratio: 1;
   overflow: hidden;
   border-radius: var(--radius);
   margin-bottom: 12px;
@@ -257,7 +274,7 @@ p{margin:.6rem 0 1rem 0}
   border:1px solid var(--line);border-radius:var(--radius);padding:20px
 }
 .feature h3{color:var(--gold);text-align: center;}
-.feature p{color:var(--text);font-size:0.95rem;line-height:1.4;text-align:center;margin-top:8px}
+.feature p{color:var(--text);font-size:0.95rem;line-height:1.4;text-align:justify;;margin-top:8px}
 .features-cta{
   text-align:center;margin-top:32px;padding:20px 0;
   background:linear-gradient(180deg,var(--card),#0f0f0f);border-radius:var(--radius);
@@ -468,17 +485,16 @@ p{margin:.6rem 0 1rem 0}
 /* Forms */
 .section.contact {
   position: relative;
-  background: url("imagens/pexels-kelly-2796105.webp") center/cover no-repeat;
 }
 .section.contact::before {
-  content: "";position: absolute;inset: 0;
-  /* gradiente + camada escura */
-  background: linear-gradient(
-      rgba(0, 0, 0, 0.4), /* topo mais escuro */
-      rgba(0, 0, 0, 0.4)  /* base igualmente escura */
-    ),
-    url("imagens/pexels-kelly-2796105.webp");
-    filter: grayscale(80%); /* deixa a imagem quase P&B */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("imagens/pexels-kelly-2796105.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(80%);
   z-index: 0;
 }
 .section.contact > .container {position: relative;  z-index: 1; filter: none} /* mantém o conteúdo acima do overlay */
