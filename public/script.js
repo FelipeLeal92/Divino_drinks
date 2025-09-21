@@ -40,13 +40,13 @@ const albuns = {
     { src: "imagens/large/large_drink3.webp", alt: "Foto 1 - Drinks" },
     { src: "imagens/large/large_drink2.webp", alt: "Foto 2 - Bar Clássico" },
     { src: "imagens/large/large_drink1.webp", alt: "Foto 3 - Bar Clássico" },
-    { src: "imagens/large/large_drink4.webp", alt: "Foto 3 - Bar Clássico" }
+    { src: "imagens/large/large_drink4.webp", alt: "Foto 3 - Bar Clássico" },
+    { src: "imagens/large/large_drink5.webp", alt: "Foto 3 - Bar Clássico" },
   ],
   2: [
     { src: "imagens/large/large_placa.webp", alt: "Foto 1 - Drinks Autorais" },
     { src: "imagens/large/large_tacas1.webp", alt: "Foto 2 - Drinks Autorais" },
     { src: "imagens/large/large_tacas2.webp", alt: "Foto 3 - Drinks Autorais" },
-    { src: "imagens/large/large_balcao.webp", alt: "Foto 3 - Drinks Autorais" },
     { src: "imagens/large/large_balcao2.webp", alt: "Foto 3 - Drinks Autorais" },
     { src: "imagens/large/large_tacas3.webp", alt: "Foto 3 - Drinks Autorais" },
   ],
