@@ -80,13 +80,13 @@
 
   <div class="container hero-inner">
     <div class="hero-content">
-      <h1>Alta COQUETELARIA para eventos INESQUECÍVEIS</h1>
-      <p>Somos especialistas em criar EXPERIENCIAS EXCLUSIVAS de Alta Coquetelaria, voltadas para quem valoriza o verdadeiro sabor da EXCELÊNCIA.</p>
+      <h1 id="hero-title">Alta COQUETELARIA para eventos INESQUECÍVEIS</h1>
+      <p id="hero-subtitle">Somos especialistas em criar EXPERIENCIAS EXCLUSIVAS de Alta Coquetelaria, voltadas para quem valoriza o verdadeiro sabor da EXCELÊNCIA.</p>
       <div class="hero-ctas">
         <a href="#contato" class="btn btn-primary">Solicitar orçamento</a>
         <a href="#homes" class="btn btn-outline">Conheça nossos serviços</a>
       </div>
-      <ul class="hero-badges">
+      <ul class="hero-badges" id="hero-badges">
         <li>
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="#D4AF37" d="M12 2l2.39 7.34H22l-6.19 4.5 2.36 7.16L12 16.7l-6.17 4.3 2.36-7.16L2 9.34h7.61z"/>
@@ -115,7 +115,7 @@
     <div class="container">
       <div class="section-header">
         <h2>A Divino</h2>
-        <p>
+        <p id="about-description">
           Somos uma equipe de mixologistas que transforma eventos em <strong>experiências sensoriais</strong>. Apaixonados por 
           <strong>eternizar momentos</strong> através dos nossos <strong>drinks</strong>, utilizamos uma carta que combina drinks autorais e clássicos, com ingredientes selecionados e atendimento exclusivo.
         </p>
@@ -125,7 +125,7 @@
         </p>
 
       </div>
-      <div class="about-grid">
+      <div class="about-grid" id="about-cards">
         <div class="about-card">
           <h3>Drinks personalizados</h3>
           <p>Acreditamos que cada cliente é único. Por isso, desenvolvemos coquetéis exclusivos, criados especialmente para refletir a identidade do seu evento. Nossos drinks podem ser totalmente personalizados.</p>
@@ -153,7 +153,7 @@
       <div class="section-header">
         <h2>Serviços</h2>
       </div>
-      <div class="cards">
+      <div class="cards" id="services-cards">
         <article class="card">
           <div class="card-image">
             <img src="imagens/coquetelaria_luxo.webp" alt="coqueteleiros preparando drinks sofisticados" loading="lazy" decoding="async" />
@@ -245,7 +245,7 @@
     <div class="carousel" role="region" aria-roledescription="carousel" aria-label="Depoimentos">
       <button class="carousel-control prev" aria-label="Anterior">‹</button>
 
-      <div class="carousel-track">
+      <div class="carousel-track" id="testimonials-track">
         <figure class="testimonial">
           <div class="testimonial-image">
             <img src="imagens/Depoimento/depoimento1.webp" alt="Foto de Marina e Lucas">
@@ -305,7 +305,7 @@
       <h2>Galeria</h2>
     </div>
 
-    <div class="gallery-grid">
+    <div class="gallery-grid" id="gallery-grid">
       <!-- Álbum 1 -->
       <a href="#" class="gallery-item" data-album="1">
         <div class="gallery-title">Drinks</div>
@@ -417,7 +417,7 @@
         <div class="logo logo-footer">
           <img src="imagens/Logo/logo_footer.png" alt="Divino Drinks Logo" />
         </div>
-        <p>Alta coquetelaria para eventos exclusivos no Brasil.</p>
+        <p id="footer-description">Alta coquetelaria para eventos exclusivos no Brasil.</p>
       </div>
 
       <div class="footer-col">
@@ -432,7 +432,7 @@
 
       <div class="footer-col">
         <h4>Contato</h4>
-        <ul class="footer-links">
+        <ul class="footer-links" id="footer-links">
           <li><a href="mailto:contato@seudominio.com">divinodrinksba@gmail.com</a></li>
           <li><a href="tel:+5571987933490">+55 (71) 98793-3490</a></li>
           <li>Salvador, BA</li>
@@ -451,142 +451,6 @@
       <i class="fas fa-arrow-up"></i>
   </a>
 
-  <!-- JS -->
-  <script src="./script.js" defer></script>
-  <script>
-    // Carregar conteúdo dinâmico
-    async function loadDynamicContent() {
-      try {
-        const res = await fetch('/api/content');
-        const content = await res.json();
-
-        // Hero
-        if (content.hero) {
-          document.querySelector('.hero-content h1').textContent = content.hero.title;
-          document.querySelector('.hero-content p').innerHTML = content.hero.subtitle.replace(/\\n/g, '<br>');
-          if (content.hero.background_image) {
-            document.querySelector('.hero').style.backgroundImage = `url(${content.hero.background_image})`;
-          }
-          // Badges
-          const badgesUl = document.querySelector('.hero-badges');
-          badgesUl.innerHTML = '';
-          (content.hero.badges || []).forEach(badge => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="#D4AF37" d="M12 2l2.39 7.34H22l-6.19 4.5 2.36 7.16L12 16.7l-6.17 4.3 2.36-7.16L2 9.34h7.61z"/>
-              </svg>
-              <span>${badge.text}</span>
-            `;
-            badgesUl.appendChild(li);
-          });
-        }
-
-        // About
-        if (content.about) {
-          const aboutDesc = content.about.description.replace(/\\n/g, '<br>');
-          const aboutPs = document.querySelectorAll('#quem-somos .section-header p');
-          aboutPs[0].innerHTML = aboutDesc.split('<br>')[0];
-          if (aboutPs[1]) aboutPs[1].innerHTML = aboutDesc.split('<br>')[1] || '';
-          const aboutGrid = document.querySelector('#quem-somos .about-grid');
-          aboutGrid.innerHTML = '';
-          content.about.cards.forEach(card => {
-            const div = document.createElement('div');
-            div.className = 'about-card';
-            div.innerHTML = `
-              <h3>${card.title}</h3>
-              <p>${card.text}</p>
-            `;
-            aboutGrid.appendChild(div);
-          });
-        }
-
-        // Services
-        if (content.services) {
-          const cardsContainer = document.querySelector('#homes .cards');
-          cardsContainer.innerHTML = '';
-          content.services.cards.forEach(card => {
-            const article = document.createElement('article');
-            article.className = 'card';
-            article.innerHTML = `
-              <div class="card-image">
-                <img src="${card.image}" alt="${card.title}" loading="lazy" decoding="async" />
-              </div>
-              <h3>${card.title}</h3>
-              <p>${card.text.replace(/\\n/g, '<br>')}</p>
-              <div class="hero-ctas">
-                <a href="#contato" class="btn btn-primary">Solicitar orçamento</a>
-              </div>
-            `;
-            cardsContainer.appendChild(article);
-          });
-        }
-
-        // Testimonials
-        if (content.testimonials) {
-          const figures = document.querySelectorAll('#depoimentos .testimonial');
-          content.testimonials.testimonials.forEach((t, i) => {
-            if (figures[i]) {
-              figures[i].querySelector('img').src = t.image;
-              figures[i].querySelector('blockquote').innerHTML = t.quote;
-              figures[i].querySelector('figcaption').textContent = '— ' + t.author;
-            }
-          });
-        }
-
-        // Gallery - simple, update titles and images
-        if (content.gallery) {
-          const items = document.querySelectorAll('.gallery-item');
-          content.gallery.albums.forEach((album, i) => {
-            if (items[i]) {
-              items[i].querySelector('.gallery-title').textContent = album.name;
-              if (album.thumbnail) items[i].querySelector('img').src = album.thumbnail;
-            }
-          });
-        }
-
-      // Carrega dados da galeria para o lightbox
-      async function loadGalleryData() {
-          try {
-              const res = await fetch('/api/gallery-lightbox');
-              const albumsData = await res.json();
-              initializeGallery(albumsData);
-          } catch (e) {
-              console.error('Erro ao carregar dados da galeria:', e);
-              // Se falhar, tenta carregar dos dados padrão
-              fetch('/api/gallery')
-                  .then(res => res.json())
-                  .then(albums => {
-                      const albumsData = {};
-                      albums.forEach((album, index) => {
-                          const albumId = (index + 1).toString();
-                          albumsData[albumId] = album.photos.map(photo => ({
-                              src: photo,
-                              alt: `Foto do álbum ${album.name}`
-                          }));
-                      });
-                      initializeGallery(albumsData);
-                  });
-          }
-      }
-
-      loadGalleryData();
-
-        // Footer
-        if (content.footer) {
-          // Assume update contact
-          const contactLi = document.querySelector('.footer-col h4 + ul li a[href^="tel:"]');
-          if (contactLi) contactLi.textContent = content.footer.contact;
-          const messageP = document.querySelector('.footer-col p');
-          if (messageP) messageP.textContent = content.footer.message;
-        }
-
-      } catch (e) {
-        console.error('Erro ao carregar conteúdo:', e);
-      }
-    }
-
-    loadDynamicContent();
-  </script>
+  <script src="main.js"></script>
 </body>
 </html>
