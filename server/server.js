@@ -13,35 +13,6 @@ const socketIo = require('socket.io');
 // E-mail opcional
 const nodemailer = require('nodemailer');
 
-// Função para obter dados da galeria
-function getGalleryData() {
-  return {
-    1: [
-      { src: "imagens/large/large_drink3.webp", alt: "Foto 1 - Drinks" },
-      { src: "imagens/large/large_drink2.webp", alt: "Foto 2 - Bar Clássico" },
-      { src: "imagens/large/large_drink1.webp", alt: "Foto 3 - Bar Clássico" },
-      { src: "imagens/large/large_drink4.webp", alt: "Foto 3 - Bar Clássico" },
-      { src: "imagens/large/large_drink5.webp", alt: "Foto 3 - Bar Clássico" },
-    ],
-    2: [
-      { src: "imagens/large/large_placa.webp", alt: "Foto 1 - Drinks Autorais" },
-      { src: "imagens/large/large_tacas1.webp", alt: "Foto 2 - Drinks Autorais" },
-      { src: "imagens/large/large_tacas2.webp", alt: "Foto 3 - Drinks Autorais" },
-      { src: "imagens/large/large_balcao2.webp", alt: "Foto 3 - Drinks Autorais" },
-      { src: "imagens/large/large_tacas3.webp", alt: "Foto 3 - Drinks Autorais" },
-    ],
-    3: [
-      { src: "imagens/large/large_convidada1.webp", alt: "Foto 1 - Eventos Especiais" },
-      { src: "imagens/large/large_convidada2.webp", alt: "Foto 2 - Eventos Especiais" },
-      { src: "imagens/large/large_convidada3.webp", alt: "Foto 3 - Eventos Especiais" },
-      { src: "imagens/large/large_convidada4.webp", alt: "Foto 2 - Eventos Especiais" },
-      { src: "imagens/large/large_convidada5.webp", alt: "Foto 2 - Eventos Especiais" },
-      { src: "imagens/large/large_convidada6.webp", alt: "Foto 2 - Eventos Especiais" },
-      { src: "imagens/large/large_convidada7.webp", alt: "Foto 2 - Eventos Especiais" }
-    ]
-  };
-}
-
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -53,42 +24,9 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 3000;
 
-// Multer config for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '..', 'public', 'imagens', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage: storage });
-
+// Middlewares
 app.use(cors());
 app.use(express.json());
-
-// API routes
-app.post('/api/upload', upload.single('image'), (req, res) => {
-  console.log('Upload request received:', req.file);
-  
-  if (!req.file) {
-    console.log('No file uploaded');
-    return res.status(400).json({ error: 'Nenhum arquivo enviado.' });
-  }
-  
-  // Return the relative path for the client
-  const url = `/imagens/uploads/${req.file.filename}`;
-  console.log('File uploaded successfully:', url);
-  res.json({ url: url });
-});
-
-// Serve static files
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Banco SQLite
@@ -125,46 +63,6 @@ app.get('/api/content', (req, res) => {
     });
     res.json(content);
   });
-});
-
-// Rota para obter dados da galeria
-// Rota para obter dados da galeria
-app.get('/api/gallery', (req, res) => {
-    try {
-        // Tenta obter do banco de dados primeiro
-        db.get('SELECT data FROM content WHERE section = "gallery"', [], (err, row) => {
-            if (err) {
-                console.error('Erro ao buscar galeria do banco:', err);
-                // Se falhar, retorna os dados padrão
-                return res.json(getGalleryData());
-            }
-            
-            if (row) {
-                try {
-                    const galleryData = JSON.parse(row.data);
-                    if (galleryData.albums) {
-                        // Converte formato do banco para formato do lightbox
-                        const albumsData = {};
-                        Object.keys(galleryData.albums).forEach(key => {
-                            albumsData[key] = galleryData.albums[key].photos.map(photo => ({
-                                src: photo,
-                                alt: `Foto do álbum ${galleryData.albums[key].name}`
-                            }));
-                        });
-                        return res.json(albumsData);
-                    }
-                } catch (e) {
-                    console.error('Erro ao parsear dados da galeria:', e);
-                }
-            }
-            
-            // Retorna dados padrão se não encontrar no banco
-            res.json(getGalleryData());
-        });
-    } catch (e) {
-        console.error('Erro na rota da galeria:', e);
-        res.json(getGalleryData());
-    }
 });
 
 // Rota para atualizar conteúdo (simples, sem auth)
@@ -248,55 +146,15 @@ app.post('/api/lead', (req, res) => {
   });
 });
 
-// Rota para atualizar dados da galeria
-app.post('/api/gallery', (req, res) => {
-  const { albums } = req.body;
-  
-  // Converte os dados do formato admin para o formato do lightbox
-  const albuns = {};
-  albums.forEach((album, index) => {
-    const albumId = (index + 1).toString();
-    albuns[albumId] = album.photos.map(photo => ({
-      src: photo,
-      alt: `Foto do álbum ${album.name}`
-    }));
-  });
 
-  // Salva no banco de dados
-  const data = JSON.stringify({ albums: albuns });
-  const query = 'INSERT OR REPLACE INTO content (section, data) VALUES (?, ?)';
-  db.run(query, ['gallery', data], function(err) {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Erro ao salvar galeria.' });
-    }
-    
-    // Notifica todos os clientes
-    io.emit('galleryUpdated', albuns);
-    
-    res.json({ ok: true });
-  });
-});
-
-// Socket.IO para atualização em tempo real
-io.on('connection', (socket) => {
-    console.log('Cliente conectado:', socket.id);
-    
-    socket.on('disconnect', () => {
-        console.log('Cliente desconectado:', socket.id);
-    });
-    
-    // Envia dados da galeria quando um cliente se conecta
-    socket.emit('galleryData', getGalleryData());
-});
-
-app.get('/api/gallery-socket', (req, res) => {
-    res.json(getGalleryData());
+app.get('/api/*', (req, res) => {
+    // Deixa as rotas API normais funcionarem
+    res.status(404).json({ error: 'Rota não encontrada' });
 });
 
 // Fallback SPA/estático
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 // Iniciar servidor

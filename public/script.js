@@ -34,74 +34,91 @@ if (toggle) {
   setInterval(() => update(1), 7000);
 })();
 
-function initializeGallery(albumsData) {
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    const lightbox = document.querySelector('.lightbox');
-    const lightboxImage = document.querySelector('.lightbox-image');
-    const btnClose = document.querySelector('.lightbox-close');
-    const btnPrev = document.querySelector('.lightbox-prev');
-    const btnNext = document.querySelector('.lightbox-next');
+// Lightbox galeria
+const albuns = {
+  1: [
+    { src: "imagens/large/large_drink3.webp", alt: "Foto 1 - Drinks" },
+    { src: "imagens/large/large_drink2.webp", alt: "Foto 2 - Bar Clássico" },
+    { src: "imagens/large/large_drink1.webp", alt: "Foto 3 - Bar Clássico" },
+    { src: "imagens/large/large_drink4.webp", alt: "Foto 3 - Bar Clássico" }
+  ],
+  2: [
+    { src: "imagens/large/large_placa.webp", alt: "Foto 1 - Drinks Autorais" },
+    { src: "imagens/large/large_tacas1.webp", alt: "Foto 2 - Drinks Autorais" },
+    { src: "imagens/large/large_tacas2.webp", alt: "Foto 3 - Drinks Autorais" },
+    { src: "imagens/large/large_balcao.webp", alt: "Foto 3 - Drinks Autorais" },
+    { src: "imagens/large/large_balcao2.webp", alt: "Foto 3 - Drinks Autorais" },
+    { src: "imagens/large/large_tacas3.webp", alt: "Foto 3 - Drinks Autorais" },
+  ],
+  3: [
+    { src: "imagens/large/large_convidada1.webp", alt: "Foto 1 - Eventos Especiais" },
+    { src: "imagens/large/large_convidada2.webp", alt: "Foto 2 - Eventos Especiais" },
+    { src: "imagens/large/large_convidada3.webp", alt: "Foto 3 - Eventos Especiais" },
+    { src: "imagens/large/large_convidada4.webp", alt: "Foto 2 - Eventos Especiais" },
+    { src: "imagens/large/large_convidada5.webp", alt: "Foto 2 - Eventos Especiais" },
+    { src: "imagens/large/large_convidada6.webp", alt: "Foto 2 - Eventos Especiais" },
+    { src: "imagens/large/large_convidada7.webp", alt: "Foto 2 - Eventos Especiais" }
+  ]
+};
 
-    if (!lightbox || !galleryItems.length) return;
+const galleryItems = document.querySelectorAll('.gallery-item');
+const lightbox = document.querySelector('.lightbox');
+const lightboxImage = document.querySelector('.lightbox-image');
+const btnClose = document.querySelector('.lightbox-close');
+const btnPrev = document.querySelector('.lightbox-prev');
+const btnNext = document.querySelector('.lightbox-next');
 
-    let currentAlbum = [];
-    let currentIndex = 0;
+let currentAlbum = [];
+let currentIndex = 0;
 
-    function openLightbox(albumId, index) {
-        currentAlbum = albumsData[albumId] || [];
-        currentIndex = index;
-        updateLightboxImage();
-        lightbox.classList.add('open');
-    }
-
-    function updateLightboxImage() {
-        if (currentAlbum.length > 0 && currentAlbum[currentIndex]) {
-            lightboxImage.src = currentAlbum[currentIndex].src;
-            lightboxImage.alt = currentAlbum[currentIndex].alt;
-        }
-    }
-
-    function closeLightbox() {
-        lightbox.classList.remove('open');
-    }
-
-    function showPrev() {
-        if (currentAlbum.length > 0) {
-            currentIndex = (currentIndex - 1 + currentAlbum.length) % currentAlbum.length;
-            updateLightboxImage();
-        }
-    }
-
-    function showNext() {
-        if (currentAlbum.length > 0) {
-            currentIndex = (currentIndex + 1) % currentAlbum.length;
-            updateLightboxImage();
-        }
-    }
-
-    galleryItems.forEach(item => {
-        item.addEventListener('click', e => {
-            e.preventDefault();
-            const albumId = item.dataset.album;
-            openLightbox(albumId, 0);
-        });
-    });
-
-    btnClose.addEventListener('click', closeLightbox);
-    btnPrev.addEventListener('click', showPrev);
-    btnNext.addEventListener('click', showNext);
-
-    lightbox.addEventListener('click', e => {
-        if (e.target === lightbox) closeLightbox();
-    });
-
-    document.addEventListener('keydown', e => {
-        if (!lightbox.classList.contains('open')) return;
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === 'ArrowLeft') showPrev();
-        if (e.key === 'ArrowRight') showNext();
-    });
+function openLightbox(albumId, index) {
+  currentAlbum = albuns[albumId];
+  currentIndex = index;
+  updateLightboxImage();
+  lightbox.classList.add('open');
 }
+
+function updateLightboxImage() {
+  lightboxImage.src = currentAlbum[currentIndex].src;
+  lightboxImage.alt = currentAlbum[currentIndex].alt;
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('open');
+}
+
+function showPrev() {
+  currentIndex = (currentIndex - 1 + currentAlbum.length) % currentAlbum.length;
+  updateLightboxImage();
+}
+
+function showNext() {
+  currentIndex = (currentIndex + 1) % currentAlbum.length;
+  updateLightboxImage();
+}
+
+galleryItems.forEach(item => {
+  item.addEventListener('click', e => {
+    e.preventDefault();
+    const albumId = item.dataset.album;
+    openLightbox(albumId, 0); // sempre começa da primeira foto do álbum
+  });
+});
+
+btnClose.addEventListener('click', closeLightbox);
+btnPrev.addEventListener('click', showPrev);
+btnNext.addEventListener('click', showNext);
+
+lightbox.addEventListener('click', e => {
+  if (e.target === lightbox) closeLightbox();
+});
+
+document.addEventListener('keydown', e => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') showPrev();
+  if (e.key === 'ArrowRight') showNext();
+});
 
 // Formulário: máscara simples de telefone e validações
 const tel = document.getElementById('telefone');

@@ -318,7 +318,7 @@
         <img src="imagens/thumb/thumb_placa.webp" alt="Drinks Autorais">
       </a>
 
-      <!-- Álbum 3 - Garantido que aparece -->
+      <!-- Álbum 3 -->
       <a href="#" class="gallery-item" data-album="3">
         <div class="gallery-title">Eventos e Convidados</div>
         <img src="imagens/thumb/thumb_cliente_sorridente1.webp" alt="Eventos Especiais">
@@ -534,37 +534,43 @@
           });
         }
 
-        // Gallery - carregamento dinâmico
-        if (content.gallery && content.gallery.albums) {
-            const galleryGrid = document.querySelector('.gallery-grid');
-            galleryGrid.innerHTML = ''; // Clear existing items
-            
-            content.gallery.albums.forEach((album, i) => {
-                const albumId = i + 1;
-                const galleryItem = document.createElement('a');
-                galleryItem.href = '#';
-                galleryItem.className = 'gallery-item';
-                galleryItem.dataset.album = albumId;
-                galleryItem.innerHTML = `
-                    <div class="gallery-title">${album.name}</div>
-                    <img src="${album.thumbnail}" alt="${album.name}">
-                `;
-                galleryGrid.appendChild(galleryItem);
-            });
-        }
-
-        // Carrega dados da galeria após o DOM estar pronto
-        async function loadGalleryData() {
-            try {
-                const res = await fetch('/api/gallery');
-                const albumsData = await res.json();
-                initializeGallery(albumsData);
-            } catch (e) {
-                console.error('Erro ao carregar dados da galeria:', e);
+        // Gallery - simple, update titles and images
+        if (content.gallery) {
+          const items = document.querySelectorAll('.gallery-item');
+          content.gallery.albums.forEach((album, i) => {
+            if (items[i]) {
+              items[i].querySelector('.gallery-title').textContent = album.name;
+              if (album.thumbnail) items[i].querySelector('img').src = album.thumbnail;
             }
+          });
         }
 
-        loadGalleryData();
+      // Carrega dados da galeria para o lightbox
+      async function loadGalleryData() {
+          try {
+              const res = await fetch('/api/gallery-lightbox');
+              const albumsData = await res.json();
+              initializeGallery(albumsData);
+          } catch (e) {
+              console.error('Erro ao carregar dados da galeria:', e);
+              // Se falhar, tenta carregar dos dados padrão
+              fetch('/api/gallery')
+                  .then(res => res.json())
+                  .then(albums => {
+                      const albumsData = {};
+                      albums.forEach((album, index) => {
+                          const albumId = (index + 1).toString();
+                          albumsData[albumId] = album.photos.map(photo => ({
+                              src: photo,
+                              alt: `Foto do álbum ${album.name}`
+                          }));
+                      });
+                      initializeGallery(albumsData);
+                  });
+          }
+      }
+
+      loadGalleryData();
 
         // Footer
         if (content.footer) {

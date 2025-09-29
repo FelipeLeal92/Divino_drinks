@@ -113,6 +113,11 @@
       const res = await fetch('/api/content');
       content = await res.json();
       populateForms();
+      const albumsList = document.getElementById('albums-list');
+      albumsList.innerHTML = '';
+      (content.gallery?.albums || []).forEach((album, i) => {
+      addAlbum(album, i);
+    });
     }
 
     function populateForms() {
@@ -251,35 +256,44 @@
         <h3>Álbum</h3>
         <div class="form-group">
           <label>Nome:</label>
-          <input type="text" class="album-name" value="${album.name || ''}" />
+          <input type="text" class="album-name" value="${album.name || ''}" placeholder="Ex: Drinks, Eventos, etc." />
         </div>
         <div class="form-group">
           <label>Capa do Álbum (Thumbnail - 400x400px):</label>
           <input type="file" class="album-thumbnail-file" accept="image/*" onchange="uploadAndSetURL(this)" />
           <input type="hidden" class="album-thumbnail-url" value="${album.thumbnail || ''}" />
-          <img class="preview album-thumbnail-preview" src="${album.thumbnail || ''}" style="display: ${album.thumbnail ? 'block' : 'none'};" />
+          <img class="preview album-thumbnail-preview" src="${album.thumbnail || ''}" style="display: ${album.thumbnail ? 'block' : 'none'};" alt="Preview da capa" />
           <p style="font-size: 12px; color: var(--text-light); margin-top: 5px;">Formato: quadrado (400x400px)</p>
         </div>
         <div class="form-group">
           <label>Fotos do Álbum (1200x800px):</label>
           <input type="file" class="album-photos-file" accept="image/*" onchange="uploadAndAddPhoto(this)" multiple />
-                      <ul class="album-photos-list">
-                          ${(album.photos || []).map(p => `
-                              <li>
-                                  <img src="${p}" style="max-width: 100px; max-height: 80px; margin-right: 10px;" />
-                                  <input type="hidden" class="photo-url" value="${p}" />
-                                  <button onclick="this.parentElement.remove()">Remover</button>
-                              </li>
-                          `).join('')}
-                      </ul>          <p style="font-size: 12px; color: var(--text-light); margin-top: 5px;">Formato: horizontal (1200x800px)</p>
+          <ul class="album-photos-list">
+            ${(album.photos || []).map(p => `
+              <li>
+                <img src="${p}" style="max-width: 100px; max-height: 80px; margin-right: 10px;" alt="Preview da foto" />
+                <input type="hidden" class="photo-url" value="${p}" />
+                <button type="button" class="btn-remove" onclick="removePhoto(this)">Remover</button>
+              </li>
+            `).join('')}
+          </ul>
+          <p style="font-size: 12px; color: var(--text-light); margin-top: 5px;">Formato: horizontal (1200x800px)</p>
         </div>
-        <button class="btn-remove" onclick="removeCard(this)">Remover Álbum</button>
+        <button type="button" class="btn-remove" onclick="removeAlbum(this)">Remover Álbum</button>
       `;
       document.getElementById('albums-list').appendChild(div);
     }
 
-    function removeCard(btn) {
-      btn.parentElement.remove();
+    // Função para remover álbum
+    function removeAlbum(btn) {
+      if (confirm('Tem certeza que deseja remover este álbum?')) {
+        btn.closest('.album-item').remove();
+      }
+    }
+
+    // Função para remover foto específica
+    function removePhoto(btn) {
+      btn.closest('li').remove();
     }
 
     function updatePreview(input, imgId) {
@@ -348,8 +362,7 @@
             input.value = '';
         }
     }
-
-    
+ 
     async function saveSection(section) {
       let data = {};
       if (section === 'hero') {
@@ -402,25 +415,43 @@
           });
         });
         data = { testimonials };
-      } else if (section === 'gallery') {
-        const albums = [];
-        document.querySelectorAll('#albums-list > .album-item').forEach(div => {
-            const name = div.querySelector('.album-name').value;
-            const thumbnail = div.querySelector('.album-thumbnail-url').value;
-            const photos = [];
-            div.querySelectorAll('.album-photos-list li .photo-url').forEach(input => {
-                photos.push(input.value);
-            });
-            albums.push({ name, thumbnail, photos });
-        });
-        data = { albums };
-        console.log('Saving gallery data:', data); // for debugging
-    } else if (section === 'footer') {
+      } else if (section === 'footer') {
         data = {
             contact: document.getElementById('footer-contact').value,
             message: document.getElementById('footer-message').value
         };
-    }
+      } else if (section === 'gallery') {
+        const albums = [];
+        document.querySelectorAll('#albums-list > .album-item').forEach(div => {
+          const name = div.querySelector('.album-name').value.trim();
+          const thumbnail = div.querySelector('.album-thumbnail-url').value;
+          const photos = [];
+          
+          // Pega todas as fotos do álbum
+          div.querySelectorAll('.album-photos-list li .photo-url').forEach(input => {
+            photos.push(input.value);
+          });
+          
+          // Só adiciona o álbum se tiver nome
+          if (name) {
+            albums.push({ name, thumbnail, photos });
+          }
+        });
+
+        // Garante que existam pelo menos 3 álbuns
+        const albumNames = ['Drinks', 'A Divino', 'Eventos e Convidados'];
+        while (albums.length < 3) {
+          const missingName = albumNames[albums.length] || `Álbum ${albums.length + 1}`;
+          albums.push({ 
+            name: missingName, 
+            thumbnail: '', 
+            photos: [] 
+          });
+        }
+        
+        data = { albums };
+        console.log('Salvando galeria:', data);
+      }
 
       const res = await fetch(`/api/content/${section}`, {
         method: 'POST',
