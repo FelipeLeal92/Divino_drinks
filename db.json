@@ -127,5 +127,18 @@
     "contact": "divinodrinksba@gmail.com",
     "phone": "+55 (71) 98793-3490"
   },
-  "leads": [ ]
+  "leads": [
+    {
+      "id": "1759184529787",
+      "dataRecebimento": "2025-09-29T22:22:09.787Z",
+      "nome": "Felipe",
+      "email": "tecnologia@logtudo.com.br",
+      "telefone": "(71) 99277-1930",
+      "tipoEvento": "Corporativo",
+      "dataEvento": "2025-11-10",
+      "convidados": 200,
+      "mensagem": "Teste",
+      "status": "novo"
+    }
+  ]
 }

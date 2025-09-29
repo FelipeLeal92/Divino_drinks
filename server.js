@@ -173,7 +173,7 @@ app.post('/api/lead', (req, res) => {
 
     const mailOptions = {
         from: process.env.EMAIL_FROM || 'seu-email@seu-provedor.com',
-        to: 'divinodrinks@gmail.com', // Email que receberá os leads
+        to: process.env.MAIL_TO, // Email que receberá os leads
         subject: 'Novo Lead Recebido - Divino Drinks',
         html: `
             <h1>Novo Pedido de Orçamento</h1>
@@ -229,7 +229,17 @@ app.post('/api/content/:section', checkAuth, (req, res) => {
 
 // Rota principal
 app.get('/', (req, res) => {
-    res.redirect('/index.html');
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) {
+            console.error('Error reading index.html:', err);
+            return res.status(500).send('Could not load the page.');
+        }
+        // Substitui o link hardcoded do WhatsApp usando uma expressão regular mais robusta
+        const whatsappLinkRegex = /https:\/\/wa\.me\/5571992771930/g;
+        const modifiedHtml = html.replace(whatsappLinkRegex, `https://wa.me/${process.env.WHATSAPP_PHONE}`);
+        res.send(modifiedHtml);
+    });
 });
 
 // Iniciar o servidor

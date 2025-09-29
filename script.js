@@ -289,7 +289,7 @@ if (form) {
 // Mensagem automatica whatsapp
 document.addEventListener("DOMContentLoaded", function(){
   // Verificar se a variável WHATSAPP_PHONE está definida
-  const numeroWhatsApp = typeof WHATSAPP_PHONE !== 'undefined' ? WHATSAPP_PHONE : '5511999999999';
+  const numeroWhatsApp = typeof WHATSAPP_PHONE !== 'undefined'
   const mensagem = "Olá, gostaria de saber mais sobre seus serviços.";
 
   const link = document.getElementById("whatsapp-link");
