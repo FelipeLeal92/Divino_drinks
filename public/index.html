@@ -534,10 +534,11 @@
           });
         }
 
-        // Gallery - simple, update titles and images
+        // Gallery - carregamento dinâmico
         if (content.gallery && content.gallery.albums) {
             const galleryGrid = document.querySelector('.gallery-grid');
             galleryGrid.innerHTML = ''; // Clear existing items
+            
             content.gallery.albums.forEach((album, i) => {
                 const albumId = i + 1;
                 const galleryItem = document.createElement('a');
@@ -550,17 +551,20 @@
                 `;
                 galleryGrid.appendChild(galleryItem);
             });
-
-            const albumsData = {};
-            content.gallery.albums.forEach((album, index) => {
-                const albumId = (index + 1).toString();
-                albumsData[albumId] = album.photos.map(photo => ({
-                    src: photo,
-                    alt: `Foto do álbum ${album.name}`
-                }));
-            });
-            initializeGallery(albumsData);
         }
+
+        // Carrega dados da galeria após o DOM estar pronto
+        async function loadGalleryData() {
+            try {
+                const res = await fetch('/api/gallery');
+                const albumsData = await res.json();
+                initializeGallery(albumsData);
+            } catch (e) {
+                console.error('Erro ao carregar dados da galeria:', e);
+            }
+        }
+
+        loadGalleryData();
 
         // Footer
         if (content.footer) {

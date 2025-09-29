@@ -36,27 +36,26 @@ if (toggle) {
 
 function initializeGallery(albumsData) {
     const galleryItems = document.querySelectorAll('.gallery-item');
-    if (galleryItems.length === 0) return;
-
     const lightbox = document.querySelector('.lightbox');
     const lightboxImage = document.querySelector('.lightbox-image');
     const btnClose = document.querySelector('.lightbox-close');
     const btnPrev = document.querySelector('.lightbox-prev');
     const btnNext = document.querySelector('.lightbox-next');
 
+    if (!lightbox || !galleryItems.length) return;
+
     let currentAlbum = [];
     let currentIndex = 0;
 
     function openLightbox(albumId, index) {
-        if (!albumsData[albumId]) return;
-        currentAlbum = albumsData[albumId];
+        currentAlbum = albumsData[albumId] || [];
         currentIndex = index;
         updateLightboxImage();
         lightbox.classList.add('open');
     }
 
     function updateLightboxImage() {
-        if (currentAlbum.length > 0) {
+        if (currentAlbum.length > 0 && currentAlbum[currentIndex]) {
             lightboxImage.src = currentAlbum[currentIndex].src;
             lightboxImage.alt = currentAlbum[currentIndex].alt;
         }
@@ -67,13 +66,17 @@ function initializeGallery(albumsData) {
     }
 
     function showPrev() {
-        currentIndex = (currentIndex - 1 + currentAlbum.length) % currentAlbum.length;
-        updateLightboxImage();
+        if (currentAlbum.length > 0) {
+            currentIndex = (currentIndex - 1 + currentAlbum.length) % currentAlbum.length;
+            updateLightboxImage();
+        }
     }
 
     function showNext() {
-        currentIndex = (currentIndex + 1) % currentAlbum.length;
-        updateLightboxImage();
+        if (currentAlbum.length > 0) {
+            currentIndex = (currentIndex + 1) % currentAlbum.length;
+            updateLightboxImage();
+        }
     }
 
     galleryItems.forEach(item => {
@@ -176,6 +179,13 @@ if (form) {
     }
   });
 }
+
+const socket = io();
+
+socket.on('galleryData', (albumsData) => {
+    initializeGallery(albumsData);
+});
+
 
 // Mensagem automatica whatsapp
 document.addEventListener("DOMContentLoaded", function(){
