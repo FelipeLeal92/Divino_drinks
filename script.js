@@ -116,6 +116,7 @@ function initializeFallbackGallery() {
       { src: "imagens/large/large_drink3.webp", alt: "Foto 1 - Drinks" },
       { src: "imagens/large/large_drink2.webp", alt: "Foto 2 - Bar Clássico" },
       { src: "imagens/large/large_drink1.webp", alt: "Foto 3 - Bar Clássico" },
+      { src: "imagens/large/large_drink4.webp", alt: "Foto 4 - Bar Clássico" },
       { src: "imagens/large/large_drink4.webp", alt: "Foto 4 - Bar Clássico" }
     ],
     2: [
