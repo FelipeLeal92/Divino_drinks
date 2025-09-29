@@ -64,7 +64,6 @@
         <ul>
           <li><a href="#quem-somos">A Divino</a></li>
           <li><a href="#homes">Serviços</a></li>
-          <li><a href="#diferenciais">Diferenciais</a></li>
           <li class="logo"><img src="imagens/Logo/logo5.png" alt="Logo Divino Drinks"></li> <!-- espaço para a logo -->
           <li><a href="#depoimentos">Depoimentos</a></li>
           <li><a href="#galeria">Galeria</a></li>
@@ -319,7 +318,7 @@
         <img src="imagens/thumb/thumb_placa.webp" alt="Drinks Autorais">
       </a>
 
-      <!-- Álbum 3 -->
+      <!-- Álbum 3 - Garantido que aparece -->
       <a href="#" class="gallery-item" data-album="3">
         <div class="gallery-title">Eventos e Convidados</div>
         <img src="imagens/thumb/thumb_cliente_sorridente1.webp" alt="Eventos Especiais">
@@ -425,7 +424,6 @@
         <h4>Links</h4>
         <ul class="footer-links">
           <li><a href="#homes">Serviços</a></li>
-          <li><a href="#diferenciais">Diferenciais</a></li>
           <li><a href="#depoimentos">Depoimentos</a></li>
           <li><a href="#galeria">Galeria</a></li>
           <li><a href="#contato">Contato</a></li>
@@ -455,5 +453,130 @@
 
   <!-- JS -->
   <script src="./script.js" defer></script>
+  <script>
+    // Carregar conteúdo dinâmico
+    async function loadDynamicContent() {
+      try {
+        const res = await fetch('/api/content');
+        const content = await res.json();
+
+        // Hero
+        if (content.hero) {
+          document.querySelector('.hero-content h1').textContent = content.hero.title;
+          document.querySelector('.hero-content p').innerHTML = content.hero.subtitle.replace(/\\n/g, '<br>');
+          if (content.hero.background_image) {
+            document.querySelector('.hero').style.backgroundImage = `url(${content.hero.background_image})`;
+          }
+          // Badges
+          const badgesUl = document.querySelector('.hero-badges');
+          badgesUl.innerHTML = '';
+          (content.hero.badges || []).forEach(badge => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#D4AF37" d="M12 2l2.39 7.34H22l-6.19 4.5 2.36 7.16L12 16.7l-6.17 4.3 2.36-7.16L2 9.34h7.61z"/>
+              </svg>
+              <span>${badge.text}</span>
+            `;
+            badgesUl.appendChild(li);
+          });
+        }
+
+        // About
+        if (content.about) {
+          const aboutDesc = content.about.description.replace(/\\n/g, '<br>');
+          const aboutPs = document.querySelectorAll('#quem-somos .section-header p');
+          aboutPs[0].innerHTML = aboutDesc.split('<br>')[0];
+          if (aboutPs[1]) aboutPs[1].innerHTML = aboutDesc.split('<br>')[1] || '';
+          const aboutGrid = document.querySelector('#quem-somos .about-grid');
+          aboutGrid.innerHTML = '';
+          content.about.cards.forEach(card => {
+            const div = document.createElement('div');
+            div.className = 'about-card';
+            div.innerHTML = `
+              <h3>${card.title}</h3>
+              <p>${card.text}</p>
+            `;
+            aboutGrid.appendChild(div);
+          });
+        }
+
+        // Services
+        if (content.services) {
+          const cardsContainer = document.querySelector('#homes .cards');
+          cardsContainer.innerHTML = '';
+          content.services.cards.forEach(card => {
+            const article = document.createElement('article');
+            article.className = 'card';
+            article.innerHTML = `
+              <div class="card-image">
+                <img src="${card.image}" alt="${card.title}" loading="lazy" decoding="async" />
+              </div>
+              <h3>${card.title}</h3>
+              <p>${card.text.replace(/\\n/g, '<br>')}</p>
+              <div class="hero-ctas">
+                <a href="#contato" class="btn btn-primary">Solicitar orçamento</a>
+              </div>
+            `;
+            cardsContainer.appendChild(article);
+          });
+        }
+
+        // Testimonials
+        if (content.testimonials) {
+          const figures = document.querySelectorAll('#depoimentos .testimonial');
+          content.testimonials.testimonials.forEach((t, i) => {
+            if (figures[i]) {
+              figures[i].querySelector('img').src = t.image;
+              figures[i].querySelector('blockquote').innerHTML = t.quote;
+              figures[i].querySelector('figcaption').textContent = '— ' + t.author;
+            }
+          });
+        }
+
+        // Gallery - simple, update titles and images
+        if (content.gallery && content.gallery.albums) {
+            const galleryGrid = document.querySelector('.gallery-grid');
+            galleryGrid.innerHTML = ''; // Clear existing items
+            content.gallery.albums.forEach((album, i) => {
+                const albumId = i + 1;
+                const galleryItem = document.createElement('a');
+                galleryItem.href = '#';
+                galleryItem.className = 'gallery-item';
+                galleryItem.dataset.album = albumId;
+                galleryItem.innerHTML = `
+                    <div class="gallery-title">${album.name}</div>
+                    <img src="${album.thumbnail}" alt="${album.name}">
+                `;
+                galleryGrid.appendChild(galleryItem);
+            });
+
+            const albumsData = {};
+            content.gallery.albums.forEach((album, index) => {
+                const albumId = (index + 1).toString();
+                albumsData[albumId] = album.photos.map(photo => ({
+                    src: photo,
+                    alt: `Foto do álbum ${album.name}`
+                }));
+            });
+            initializeGallery(albumsData);
+        }
+
+        // Footer
+        if (content.footer) {
+          // Assume update contact
+          const contactLi = document.querySelector('.footer-col h4 + ul li a[href^="tel:"]');
+          if (contactLi) contactLi.textContent = content.footer.contact;
+          const messageP = document.querySelector('.footer-col p');
+          if (messageP) messageP.textContent = content.footer.message;
+        }
+
+      } catch (e) {
+        console.error('Erro ao carregar conteúdo:', e);
+      }
+    }
+
+    loadDynamicContent();
+  </script>
 </body>
 </html>

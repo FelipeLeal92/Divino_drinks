@@ -1,7 +1,7 @@
 {
-  "name": "divino-drinks",
+  "name": "divino-drinks-server",
   "version": "1.0.0",
-  "description": "Landing page Divino Drinks — alta coquetelaria para eventos",
+  "description": "Server for the Divino Drinks landing page.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -13,14 +13,19 @@
     "eventos",
     "bartender"
   ],
-  "author": "Divino Drinks",
+  "author": {
+    "name": "Divino Drinks"
+  },
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "express": "^4.21.2",
+    "multer": "^2.0.2",
     "nodemailer": "^6.10.1",
-    "sqlite3": "^5.1.7"
+    "socket.io": "^4.8.1",
+    "sqlite3": "^5.1.7",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

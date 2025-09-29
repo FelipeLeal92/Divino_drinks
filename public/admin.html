@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - Divino Drinks</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .admin-container { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
+    .admin-section { background: var(--card); padding: 20px; margin-bottom: 20px; border-radius: var(--radius); border: 1px solid var(--line); }
+    .admin-section h2 { color: var(--gold); margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; color: var(--text); }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 5px; color: var(--text); }
+    .card-item { background: var(--bg); padding: 15px; margin-bottom: 10px; border-radius: 5px; border: 1px solid var(--line); }
+    .card-item h3 { margin-top: 0; color: var(--gold); }
+    .btn-admin { background: var(--gold); color: #111; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+    .btn-admin:hover { background: var(--gold-2); }
+    .btn-remove { background: #d9534f; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+    .preview { max-width: 100px; margin-top: 10px; }
+    .hero-badges { margin-top: 20px; }
+    .badge-item { display: flex; align-items: center; margin-bottom: 10px; }
+    .badge-item input { margin-left: 10px; }
+    .album-photos-list li { display: flex; align-items: center; margin-bottom: 5px; }
+    .album-photos-list input { flex-grow: 1; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <h1 style="text-align: center; color: var(--gold);">Administração do Site - Divino Drinks</h1>
+
+    <details class="admin-section" open>
+      <summary><h2>Hero</h2></summary>
+      <div class="form-group">
+        <label>Imagem de fundo (URL):</label>
+        <input type="text" id="hero-bg" onchange="updatePreview(this, 'hero-bg-preview')" />
+        <img id="hero-bg-preview" class="preview" alt="Preview" style="display:none;" />
+      </div>
+      <div class="form-group">
+        <label>Título:</label>
+        <textarea id="hero-title" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Subtítulo:</label>
+        <textarea id="hero-subtitle" rows="3"></textarea>
+      </div>
+      <div class="hero-badges">
+        <h3>Badges</h3>
+        <div id="hero-badges-list"></div>
+        <button class="btn-admin" onclick="addHeroBadge()">Adicionar Badge</button>
+      </div>
+      <button class="btn-admin" onclick="saveSection('hero')">Salvar Hero</button>
+    </details>
+
+    <details class="admin-section">
+      <summary><h2>Quem Somos</h2></summary>
+      <div class="form-group">
+        <label>Descrição:</label>
+        <textarea id="about-desc" rows="5"></textarea>
+      </div>
+      <h3>Cards</h3>
+      <div id="about-cards"></div>
+      <button class="btn-admin" onclick="addAboutCard()">Adicionar Card</button>
+      <button class="btn-admin" onclick="saveSection('about')">Salvar Quem Somos</button>
+    </details>
+
+    <details class="admin-section">
+      <summary><h2>Serviços</h2></summary>
+      <h3>Cards</h3>
+      <div id="services-cards"></div>
+      <button class="btn-admin" onclick="addServiceCard()">Adicionar Serviço</button>
+      <button class="btn-admin" onclick="saveSection('services')">Salvar Serviços</button>
+    </details>
+
+    <details class="admin-section">
+      <summary><h2>Depoimentos</h2></summary>
+      <div id="testimonials-list"></div>
+      <button class="btn-admin" onclick="addTestimonial()">Adicionar Depoimento</button>
+      <button class="btn-admin" onclick="saveSection('testimonials')">Salvar Depoimentos</button>
+    </details>
+
+    <details class="admin-section">
+      <summary><h2>Galeria</h2></summary>
+      <p style="font-size: 12px; color: var(--text-light);">
+        <strong>Capas dos Álbuns:</strong> Dimensão recomendada: 400x400 pixels (quadrada).<br>
+        <strong>Fotos dos Álbuns:</strong> Dimensão recomendada: 1200x800 pixels.
+      </p>
+      <div id="albums-list"></div>
+      <button class="btn-admin" onclick="addAlbum()">Adicionar Álbum</button>
+      <button class="btn-admin" onclick="saveSection('gallery')">Salvar Galeria</button>
+    </details>
+
+    <details class="admin-section">
+      <summary><h2>Footer</h2></summary>
+      <div class="form-group">
+        <label>Contato:</label>
+        <input type="text" id="footer-contact" />
+      </div>
+      <div class="form-group">
+        <label>Mensagem:</label>
+        <textarea id="footer-message" rows="3"></textarea>
+      </div>
+      <button class="btn-admin" onclick="saveSection('footer')">Salvar Footer</button>
+    </details>
+  </div>
+
+  <script>
+    let content = {};
+    let serviceCounter = 0;
+    let testimonialCounter = 0;
+
+    async function loadContent() {
+      const res = await fetch('/api/content');
+      content = await res.json();
+      populateForms();
+    }
+
+    function populateForms() {
+      // Hero
+      const heroBgInput = document.getElementById('hero-bg');
+      heroBgInput.value = content.hero?.background_image || '';
+      updatePreview(heroBgInput, 'hero-bg-preview');
+      document.getElementById('hero-title').value = content.hero?.title || '';
+      document.getElementById('hero-subtitle').value = content.hero?.subtitle || '';
+      const badgesList = document.getElementById('hero-badges-list');
+      badgesList.innerHTML = '';
+      (content.hero?.badges || []).forEach((badge, i) => {
+        addHeroBadge(badge, i);
+      });
+
+      // About
+      document.getElementById('about-desc').value = content.about?.description?.replace(/\\n/g, '\n') || '';
+      const aboutCards = document.getElementById('about-cards');
+      aboutCards.innerHTML = '';
+      (content.about?.cards || []).forEach((card, i) => {
+        addAboutCard(card, i);
+      });
+
+      // Services
+      serviceCounter = 0;
+      const servicesCards = document.getElementById('services-cards');
+      servicesCards.innerHTML = '';
+      (content.services?.cards || []).forEach(card => {
+        addServiceCard(card);
+      });
+
+      // Testimonials
+      testimonialCounter = 0;
+      const testimonialsList = document.getElementById('testimonials-list');
+      testimonialsList.innerHTML = '';
+      (content.testimonials?.testimonials || []).forEach(t => {
+        addTestimonial(t);
+      });
+
+      // Gallery
+      const albumsList = document.getElementById('albums-list');
+      albumsList.innerHTML = '';
+      (content.gallery?.albums || []).forEach((album, i) => {
+        addAlbum(album, i);
+      });
+
+      // Footer
+      document.getElementById('footer-contact').value = content.footer?.contact || '';
+      document.getElementById('footer-message').value = content.footer?.message || '';
+    }
+
+    function addHeroBadge(badge = {}, i = Date.now()) {
+      const div = document.createElement('div');
+      div.className = 'badge-item';
+      div.innerHTML = `
+        <label>Ícone: <input type="text" value="${badge.icon || ''}" placeholder="e.g., star" /></label>
+        <label>Texto: <input type="text" value="${badge.text || ''}" /></label>
+        <button class="btn-remove" onclick="removeCard(this)">Remover</button>
+      `;
+      document.getElementById('hero-badges-list').appendChild(div);
+    }
+
+    function addAboutCard(card = {}, i = Date.now()) {
+      const div = document.createElement('div');
+      div.className = 'card-item';
+      div.innerHTML = `
+        <h3>Card</h3>
+        <div class="form-group">
+          <label>Título:</label>
+          <input type="text" value="${card.title || ''}" />
+        </div>
+        <div class="form-group">
+          <label>Texto:</label>
+          <textarea rows="3">${card.text || ''}</textarea>
+        </div>
+        <button class="btn-remove" onclick="removeCard(this)">Remover Card</button>
+      `;
+      document.getElementById('about-cards').appendChild(div);
+    }
+
+    function addServiceCard(card = {}) {
+      const id = 'service-' + serviceCounter++;
+      const div = document.createElement('div');
+      div.className = 'card-item';
+      div.innerHTML = `
+        <h3>Serviço</h3>
+        <div class="form-group">
+          <label>Imagem (URL):</label>
+          <input type="text" value="${card.image || ''}" onchange="updatePreview(this, '${id}-preview')" />
+          <img id="${id}-preview" class="preview" alt="Preview" style="display:none;" />
+        </div>
+        <div class="form-group">
+          <label>Título:</label>
+          <input type="text" value="${card.title || ''}" />
+        </div>
+        <div class="form-group">
+          <label>Texto:</label>
+          <textarea rows="4">${card.text?.replace(/\\n/g, '\n') || ''}</textarea>
+        </div>
+        <button class="btn-remove" onclick="removeCard(this)">Remover Serviço</button>
+      `;
+      document.getElementById('services-cards').appendChild(div);
+      updatePreview(div.querySelector('input[type="text"]'), `${id}-preview`);
+    }
+
+    function addTestimonial(t = {}) {
+      const id = 'testimonial-' + testimonialCounter++;
+      const div = document.createElement('div');
+      div.className = 'card-item';
+      div.innerHTML = `
+        <h3>Depoimento</h3>
+        <div class="form-group">
+          <label>Imagem (URL):</label>
+          <input type="text" value="${t.image || ''}" onchange="updatePreview(this, '${id}-preview')" />
+          <img id="${id}-preview" class="preview" alt="Preview" style="display:none;" />
+        </div>
+        <div class="form-group">
+          <label>Citação:</label>
+          <textarea rows="3">${t.quote || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Autor:</label>
+          <input type="text" value="${t.author || ''}" />
+        </div>
+        <button class="btn-remove" onclick="removeCard(this)">Remover Depoimento</button>
+      `;
+      document.getElementById('testimonials-list').appendChild(div);
+      updatePreview(div.querySelector('input[type="text"]'), `${id}-preview`);
+    }
+
+    function addAlbum(album = { name: '', thumbnail: '', photos: [] }, i = Date.now()) {
+      const div = document.createElement('div');
+      div.className = 'card-item album-item';
+      div.dataset.id = i;
+      div.innerHTML = `
+        <h3>Álbum</h3>
+        <div class="form-group">
+          <label>Nome:</label>
+          <input type="text" class="album-name" value="${album.name || ''}" />
+        </div>
+        <div class="form-group">
+          <label>Capa do Álbum (Thumbnail - 400x400px):</label>
+          <input type="file" class="album-thumbnail-file" accept="image/*" onchange="uploadAndSetURL(this)" />
+          <input type="hidden" class="album-thumbnail-url" value="${album.thumbnail || ''}" />
+          <img class="preview album-thumbnail-preview" src="${album.thumbnail || ''}" style="display: ${album.thumbnail ? 'block' : 'none'};" />
+          <p style="font-size: 12px; color: var(--text-light); margin-top: 5px;">Formato: quadrado (400x400px)</p>
+        </div>
+        <div class="form-group">
+          <label>Fotos do Álbum (1200x800px):</label>
+          <input type="file" class="album-photos-file" accept="image/*" onchange="uploadAndAddPhoto(this)" multiple />
+                      <ul class="album-photos-list">
+                          ${(album.photos || []).map(p => `
+                              <li>
+                                  <img src="${p}" style="max-width: 100px; max-height: 80px; margin-right: 10px;" />
+                                  <input type="hidden" class="photo-url" value="${p}" />
+                                  <button onclick="this.parentElement.remove()">Remover</button>
+                              </li>
+                          `).join('')}
+                      </ul>          <p style="font-size: 12px; color: var(--text-light); margin-top: 5px;">Formato: horizontal (1200x800px)</p>
+        </div>
+        <button class="btn-remove" onclick="removeCard(this)">Remover Álbum</button>
+      `;
+      document.getElementById('albums-list').appendChild(div);
+    }
+
+    function removeCard(btn) {
+      btn.parentElement.remove();
+    }
+
+    function updatePreview(input, imgId) {
+      const img = document.getElementById(imgId);
+      if (input && input.value) {
+        img.src = input.value;
+        img.style.display = 'block';
+      } else if (img) {
+        img.style.display = 'none';
+      }
+    }
+
+    async function uploadFile(file) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Falha no upload' }));
+        throw new Error(errorData.error);
+      }
+      const result = await res.json();
+      return result.url;
+    }
+
+    async function uploadAndSetURL(input) {
+      const cardItem = input.closest('.card-item');
+      const preview = cardItem.querySelector('.album-thumbnail-preview');
+      const urlInput = cardItem.querySelector('.album-thumbnail-url');
+      
+      if (input.files.length > 0) {
+        try {
+          input.disabled = true;
+          const url = await uploadFile(input.files[0]);
+          urlInput.value = url;
+          preview.src = url;
+          preview.style.display = 'block';
+        } catch (err) {
+          alert('Erro no upload: ' + err.message);
+        } finally {
+          input.disabled = false;
+          input.value = '';
+        }
+      }
+    }
+
+    async function uploadAndAddPhoto(input) {
+        const cardItem = input.closest('.card-item');
+        const list = cardItem.querySelector('.album-photos-list');
+
+        try {
+            input.disabled = true;
+            for (const file of input.files) {
+                const url = await uploadFile(file);
+                const li = document.createElement('li');
+                li.innerHTML = `
+                  <img src="${url}" style="max-width: 100px; max-height: 80px; margin-right: 10px;" />
+                  <input type="hidden" class="photo-url" value="${url}" />
+                  <button onclick="this.parentElement.remove()">Remover</button>
+                `;
+                list.appendChild(li);
+            }
+        } catch (err) {
+            alert('Erro no upload: ' + err.message);
+        } finally {
+            input.disabled = false;
+            input.value = '';
+        }
+    }
+
+    
+    async function saveSection(section) {
+      let data = {};
+      if (section === 'hero') {
+        const badges = [];
+        document.querySelectorAll('#hero-badges-list > .badge-item').forEach(div => {
+          const inputs = div.querySelectorAll('input');
+          badges.push({
+            icon: inputs[0].value,
+            text: inputs[1].value
+          });
+        });
+        data = {
+          background_image: document.getElementById('hero-bg').value,
+          title: document.getElementById('hero-title').value,
+          subtitle: document.getElementById('hero-subtitle').value,
+          badges
+        };
+      } else if (section === 'about') {
+        const cards = [];
+        document.querySelectorAll('#about-cards > .card-item').forEach(div => {
+          const inputs = div.querySelectorAll('input, textarea');
+          cards.push({
+            title: inputs[0].value,
+            text: inputs[1].value
+          });
+        });
+        data = {
+          description: document.getElementById('about-desc').value.replace(/\n/g, '\\n'),
+          cards
+        };
+      } else if (section === 'services') {
+        const cards = [];
+        document.querySelectorAll('#services-cards > .card-item').forEach(div => {
+          const inputs = div.querySelectorAll('input, textarea');
+          cards.push({
+            image: inputs[0].value,
+            title: inputs[1].value,
+            text: inputs[2].value.replace(/\n/g, '\\n')
+          });
+        });
+        data = { cards };
+      } else if (section === 'testimonials') {
+        const testimonials = [];
+        document.querySelectorAll('#testimonials-list > .card-item').forEach(div => {
+          const inputs = div.querySelectorAll('input, textarea');
+          testimonials.push({
+            image: inputs[0].value,
+            quote: inputs[1].value,
+            author: inputs[2].value
+          });
+        });
+        data = { testimonials };
+      } else if (section === 'gallery') {
+        const albums = [];
+        document.querySelectorAll('#albums-list > .album-item').forEach(div => {
+            const name = div.querySelector('.album-name').value;
+            const thumbnail = div.querySelector('.album-thumbnail-url').value;
+            const photos = [];
+            div.querySelectorAll('.album-photos-list li .photo-url').forEach(input => {
+                photos.push(input.value);
+            });
+            albums.push({ name, thumbnail, photos });
+        });
+        data = { albums };
+        console.log('Saving gallery data:', data); // for debugging
+    } else if (section === 'footer') {
+        data = {
+            contact: document.getElementById('footer-contact').value,
+            message: document.getElementById('footer-message').value
+        };
+    }
+
+      const res = await fetch(`/api/content/${section}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        alert('Salvo com sucesso!');
+        loadContent(); // reload
+      } else {
+        alert('Erro ao salvar');
+      }
+    }
+
+    loadContent();
+  </script>
+</body>
+</html>
