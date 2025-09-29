@@ -19,7 +19,7 @@
     ]
   },
   "about": {
-    "description": "Somos uma equipe de mixologistas que transforma eventos em <strong>experiências sensoriais</strong>. Apaixonados por <strong>eternizar momentos</strong> através dos nossos <strong>drinks</strong>, utilizamos uma carta que combina drinks autorais e clássicos, com ingredientes selecionados e atendimento exclusivo.\\n\\nCom um <strong>histórico de sucesso</strong> em eventos de diversos segmentos, somos reconhecidos como <strong>referência em excelência</strong> no serviço de bar. Entendemos que <strong>cada evento é único</strong>, por isso contamos com uma equipe de profissionais altamente qualificados para garantir um atendimento impecável e manter nosso elevado padrão de qualidade.",
+    "description": "Somos uma equipe de mixologistas que transforma eventos em <strong>experiências sensoriais</strong>. Apaixonados por <strong>eternizar momentos</strong> através dos nossos <strong>drinks</strong>, utilizamos uma carta que combina drinks autorais e clássicos, com ingredientes selecionados e atendimento exclusivo.\n\nCom um <strong>histórico de sucesso</strong> em eventos de diversos segmentos, somos reconhecidos como <strong>referência em excelência</strong> no serviço de bar. Entendemos que <strong>cada evento é único</strong>, por isso contamos com uma equipe de profissionais altamente qualificados para garantir um atendimento impecável e manter nosso elevado padrão de qualidade.",
     "cards": [
       {
         "title": "Drinks personalizados",
@@ -126,5 +126,6 @@
     "description": "Alta coquetelaria para eventos exclusivos no Brasil.",
     "contact": "divinodrinksba@gmail.com",
     "phone": "+55 (71) 98793-3490"
-  }
+  },
+  "leads": [ ]
 }

@@ -223,6 +223,167 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Menu mobile
+    const toggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('.nav');
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        const open = nav.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      // Fechar ao clicar em link
+      nav.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') nav.classList.remove('open');
+      });
+    }
+
+    // Carousel simples
+    (function carousel(){
+      const track = document.querySelector('.carousel-track');
+      const prev = document.querySelector('.carousel .prev');
+      const next = document.querySelector('.carousel .next');
+      if (!track) return;
+      let index = 0;
+      const slides = Array.from(track.children);
+
+      function update(direction){
+        index = (index + direction + slides.length) % slides.length;
+        track.scrollTo({ left: slides[index].offsetLeft, behavior: 'smooth' });
+      }
+      prev.addEventListener('click', () => update(-1));
+      next.addEventListener('click', () => update(1));
+      // Auto-play leve
+      setInterval(() => update(1), 7000);
+    })();
+
+    // Formulário: máscara simples de telefone e validações
+    const tel = document.getElementById('telefone');
+    if (tel) {
+      tel.addEventListener('input', () => {
+        let v = tel.value.replace(/\D/g,'').slice(0,11);
+        if (v.length > 6) tel.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+        else if (v.length > 2) tel.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
+        else tel.value = v;
+      });
+    }
+
+    // Data mínima = hoje
+    const dataEvento = document.getElementById('dataEvento');
+    if (dataEvento) {
+      const today = new Date(); 
+      today.setHours(0,0,0,0);
+      const iso = today.toISOString().split('T')[0];
+      dataEvento.min = iso;
+    }
+
+    // Envio do formulário (para backend Node)
+    const form = document.getElementById('lead-form');
+    const statusEl = document.querySelector('.form-status');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        statusEl.textContent = 'Enviando...';
+
+        const payload = {
+          nome: form.nome.value.trim(),
+          email: form.email.value.trim(),
+          telefone: form.telefone.value.trim(),
+          tipoEvento: form.tipoEvento.value,
+          dataEvento: form.dataEvento.value,
+          convidados: Number(form.convidados.value),
+          mensagem: form.mensagem.value.trim()
+        };
+
+        // Validações simples
+        if (
+          !payload.nome ||
+          !payload.email ||
+          !payload.telefone ||
+          !payload.tipoEvento ||
+          !payload.dataEvento ||
+          !payload.convidados
+        ) {
+          statusEl.style.color = '#ffb7b7';
+          statusEl.textContent = 'Por favor, preencha todos os campos obrigatórios.';
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/lead', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json().catch(() => ({}));
+          console.log('Resposta do servidor:', res.status, data);
+
+          if (!res.ok) {
+            throw new Error(data.error || 'Falha no envio');
+          }
+
+          statusEl.style.color = '#b7ffb7';
+          statusEl.textContent = 'Recebemos seu pedido! Em breve entraremos em contato.';
+          form.reset();
+        } catch (err) {
+          console.error('Erro no envio:', err);
+          statusEl.style.color = '#ffb7b7';
+          statusEl.textContent = 'Não foi possível enviar agora. Tente novamente em instantes.';
+        }
+      });
+    }
+
+    /*==================== SHOW SCROLL UP ====================*/ 
+    function scrollUp(){
+        const scrollUp = document.getElementById('scroll-up');
+        if (scrollUp) {
+          // When the scroll is higher than 560 viewport height, add the show-scroll class
+          if(window.scrollY >= 560) {
+            scrollUp.classList.add('show-scroll');
+          } else {
+            scrollUp.classList.remove('show-scroll');
+          }
+        }
+    }
+    window.addEventListener('scroll', scrollUp);
+
+    /*==================== SCROLL SECTIONS ACTIVE LINK ====================*/
+    const sections = document.querySelectorAll('section[id]');
+
+    function scrollActive(){
+        const scrollY = window.pageYOffset;
+
+        sections.forEach(current => {
+            const sectionHeight = current.offsetHeight;
+            const sectionTop = current.offsetTop - 50;
+            const sectionId = current.getAttribute('id');
+            const navLink = document.querySelector('.nav a[href*=' + sectionId + ']');
+
+            if (navLink) {
+              if(scrollY > sectionTop && scrollY <= sectionTop + sectionHeight){
+                  navLink.classList.add('active-link');
+              } else {
+                  navLink.classList.remove('active-link');
+              }
+            }
+        });
+    }
+    window.addEventListener('scroll', scrollActive);
+
+    /*==================== SMOOTH SCROLLING ====================*/
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
     // --- Initial Load ---
     loadAndPopulateContent();
 });

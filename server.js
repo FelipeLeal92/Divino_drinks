@@ -126,6 +126,81 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+
+// --- Rota para Leads (Pública) ---
+app.post('/api/lead', (req, res) => {
+    const { nome, email, telefone, tipoEvento, dataEvento, convidados, mensagem } = req.body;
+
+    // Validação simples no backend
+    if (!nome || !email || !telefone || !tipoEvento || !dataEvento || !convidados) {
+        return res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos.' });
+    }
+
+    const newLead = {
+        id: Date.now().toString(),
+        dataRecebimento: new Date().toISOString(),
+        nome,
+        email,
+        telefone,
+        tipoEvento,
+        dataEvento,
+        convidados,
+        mensagem,
+        status: 'novo' // Status inicial do lead
+    };
+
+    // Garante que o array de leads exista no DB
+    if (!db.leads) {
+        db.leads = [];
+    }
+
+    db.leads.push(newLead);
+    saveDb();
+
+    // Lógica de envio de email (exemplo com Nodemailer)
+    const nodemailer = require('nodemailer');
+
+    // Configuração do transporter (use variáveis de ambiente em produção)
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: process.env.EMAIL_PORT == 465, // true for 465, false for other ports
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_FROM || 'seu-email@seu-provedor.com',
+        to: 'divinodrinks@gmail.com', // Email que receberá os leads
+        subject: 'Novo Lead Recebido - Divino Drinks',
+        html: `
+            <h1>Novo Pedido de Orçamento</h1>
+            <p><strong>Nome:</strong> ${nome}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Telefone:</strong> ${telefone}</p>
+            <p><strong>Tipo de Evento:</strong> ${tipoEvento}</p>
+            <p><strong>Data do Evento:</strong> ${dataEvento}</p>
+            <p><strong>Nº de Convidados:</strong> ${convidados}</p>
+            <p><strong>Mensagem:</strong></p>
+            <p>${mensagem}</p>
+        `
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Erro ao enviar email:', error);
+            // Mesmo com erro no email, o lead foi salvo.
+            // Poderíamos ter uma lógica de fallback aqui.
+        } else {
+            console.log('Email enviado:', info.response);
+        }
+    });
+
+    res.status(201).json({ message: 'Lead recebido com sucesso!' });
+});
+
 // --- Rotas da API (protegidas) ---
 app.post('/api/upload', checkAuth, upload.single('image'), (req, res) => {
     if (!req.file) {
